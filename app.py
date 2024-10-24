@@ -7,6 +7,8 @@ API_KEY = os.getenv("RADARR_API_KEY")
 RADARR_URL = os.getenv("RADARR_URL")
 REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", 10))
 
+print(f'Starting collection-monitorr for Radarr URL: {RADARR_URL}')
+
 if not API_KEY or not RADARR_URL:
     print("Missing RADARR_API_KEY or RADARR_URL environment variables.")
     exit(1)
