@@ -8,9 +8,10 @@ Make sure your Radarr collections are always monitored!
 docker run -d \
     -e RADARR_API_KEY=<API Key For Radarr> \
     -e RADARR_URL=<URL to access Radarr> \
-    -e REFRESH_MINUTES=<Minutes between refreshes, default 10>
-    -e RADARR_ROOT_FOLDER_PATH=<root path for movies in radarr, default /movies>
-    -e RADARR_QUALITY_PROFILE=<Radarr quality profile, default Any>
+    -e REFRESH_MINUTES=<Minutes between refreshes, default 10> \
+    -e RADARR_ROOT_FOLDER_PATH=<root path for movies in radarr, default /movies> \
+    -e RADARR_QUALITY_PROFILE=<Radarr quality profile, default Any> \
+    -e MAX_WORKERS=<Number of threads for collection checks, default 3> \
     --name collection-monitorr \
     ghcr.io/diamkil/collection-monitorrr:main
 ```
@@ -27,4 +28,5 @@ services:
       - REFRESH_MINUTES=<Minutes between refreshes, default 10>
       - RADARR_ROOT_FOLDER_PATH=<root path for movies in radarr, default /movies>
       - RADARR_QUALITY_PROFILE=<Radarr quality profile, default Any>
+      - MAX_WORKERS=<Number of threads for collection checks, default 3>
 ```

@@ -2,12 +2,14 @@ import os
 import requests
 import schedule
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 API_KEY = os.getenv("RADARR_API_KEY")
 RADARR_URL = os.getenv("RADARR_URL")
 REFRESH_MINUTES = int(os.getenv("RADARR_REFRESH_MINUTES", 10))  # Ensure it's an integer
 QUALITY_PROFILE = os.getenv("RADARR_QUALITY_PROFILE", "Any")  # Default to "Any"
 ROOT_FOLDER_PATH = os.getenv("RADARR_ROOT_FOLDER_PATH", "/movies")  # Default to /movies
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", 3))  # Default to 5 threads if not set
 
 if not API_KEY or not RADARR_URL:
     print("Missing RADARR_API_KEY or RADARR_URL environment variables.")
@@ -42,15 +44,25 @@ def monitor_collections():
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Raise an error for bad responses
         collections = response.json()
-        for collection in collections:
-            print(f"Checking collection: {collection['title']}")
-            # Check for missing movies in the collection
-            check_for_missing_movies_in_collection(collection['id'])
+
+        # Use ThreadPoolExecutor to parallelize the collection checks
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = [
+                executor.submit(check_for_missing_movies_in_collection, collection['id'], collection['title'])
+                for collection in collections
+            ]
+            for future in as_completed(futures):
+                try:
+                    future.result()  # This will raise any exceptions that occurred in the threads
+                except Exception as e:
+                    print(f"Error in collection check: {e}")
+
     except requests.exceptions.RequestException as e:
         print(f"Error retrieving collections: {e}")
     print('Done running!')
 
-def check_for_missing_movies_in_collection(collection_id):
+def check_for_missing_movies_in_collection(collection_id, collection_title):
+    print(f"Checking collection: {collection_title}")
     # Fetch the collection details with the list of movies
     collection_movies_url = f"{RADARR_URL}/api/v3/collection/{collection_id}"
     headers = {"X-Api-Key": API_KEY}
