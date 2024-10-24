@@ -5,12 +5,37 @@ import time
 
 API_KEY = os.getenv("RADARR_API_KEY")
 RADARR_URL = os.getenv("RADARR_URL")
-REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", 10))  # Ensure it's an integer
-QUALITY_PROFILE_ID = int(os.getenv("RADARR_QUALITY_PROFILE_ID", 1))  # Default to 1
+REFRESH_MINUTES = int(os.getenv("RADARR_QUALITY_PROFILE", 10))  # Ensure it's an integer
+QUALITY_PROFILE = os.getenv("RADARR_QUALITY_PROFILE", "Any")  # Default to HD-1080p
 ROOT_FOLDER_PATH = os.getenv("RADARR_ROOT_FOLDER_PATH", "/movies")  # Default to /movies
 
 if not API_KEY or not RADARR_URL:
     print("Missing RADARR_API_KEY or RADARR_URL environment variables.")
+    exit(1)
+
+def get_quality_profile_id(profile_name):
+    url = f"{RADARR_URL}/api/v3/qualityProfile"
+    headers = {"X-Api-Key": API_KEY}
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        profiles = response.json()
+        
+        for profile in profiles:
+            if profile['name'].lower() == profile_name.lower():
+                return profile['id']
+        
+        print(f"Quality profile '{profile_name}' not found.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error retrieving quality profiles: {e}")
+        return None
+
+QUALITY_PROFILE_ID = get_quality_profile_id(QUALITY_PROFILE)
+
+if not QUALITY_PROFILE_ID:
+    print("Failed to retrieve quality profile ID. Exiting.")
     exit(1)
 
 def monitor_collections():
