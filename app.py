@@ -66,8 +66,10 @@ def search_movie(movie_id):
     else:
         print(f"Failed to initiate search for movie ID: {movie_id}")
 
+print(f'Scheduling to run every {REFRESH_MINUTES} minutes')
 schedule.every(REFRESH_MINUTES).minutes.do(monitor_collections)
 
+print(f'Doing first run!')
 monitor_collections()
 
 while True:
