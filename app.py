@@ -82,8 +82,8 @@ def check_for_missing_movies_in_collection(collection_id, collection_title):
             if movie['title'] not in radarr_movie_titles:
                 print(f"Missing movie in Radarr: {movie['title']}, adding...")
                 add_movie_to_radarr(movie)
-            else:
-                print(f"Movie already in Radarr: {movie['title']}")
+            # else:
+            #     print(f"Movie already in Radarr: {movie['title']}")
     except requests.exceptions.RequestException as e:
         print(f"Error checking for missing movies: {e}")
 
