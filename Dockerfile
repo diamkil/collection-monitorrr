@@ -1,6 +1,8 @@
 FROM python:3.9-slim
 
-RUN pip install requests schedule
+WORKDIR /app
 
-COPY app.py /app/app.py
-CMD ["python", "/app/app.py"]
+RUN pip install --no-cache-dir requests schedule
+
+COPY app.py .
+CMD ["python", "./app.py"]
