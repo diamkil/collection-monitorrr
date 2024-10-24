@@ -68,6 +68,8 @@ def search_movie(movie_id):
 
 schedule.every(REFRESH_MINUTES).minutes.do(monitor_collections)
 
+monitor_collections()
+
 while True:
     schedule.run_pending()
     time.sleep(1)
