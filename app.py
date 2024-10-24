@@ -14,6 +14,7 @@ if not API_KEY or not RADARR_URL:
     exit(1)
 
 def monitor_collections():
+    print('Starting Run!')
     url = f"{RADARR_URL}/api/v3/collection"
     headers = {"X-Api-Key": API_KEY}
     
@@ -34,6 +35,8 @@ def monitor_collections():
                     print(f"Failed to monitor collection: {collection['title']} (status code: {response.status_code})")
     except requests.exceptions.RequestException as e:
         print(f"Error retrieving collections: {e}")
+
+    print('Done running!')
 
 def monitor_and_search_movies(collection_id):
     url = f"{RADARR_URL}/api/v3/movie"
@@ -74,7 +77,6 @@ def search_movie(movie_id):
 print(f'Scheduling to run every {REFRESH_MINUTES} minutes')
 schedule.every(REFRESH_MINUTES).minutes.do(monitor_collections)
 
-print(f'Doing first run!')
 monitor_collections()
 
 while True:
