@@ -1,20 +1,10 @@
-FROM python:3.9-slim AS build
+FROM python:3.9-slim
 
 WORKDIR /app
-
-# Setup venv
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install --no-cache-dir requests schedule
 
-FROM gcr.io/distroless/python3-debian12
-
-WORKDIR /app
-
-# Copy venv
-COPY --from=build /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
 
 COPY app.py .
-CMD ["/app/app.py"]
+CMD ["python", "/app/app.py"]
