@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 API_KEY = os.getenv("RADARR_API_KEY")
 RADARR_URL = os.getenv("RADARR_URL")
-REFRESH_MINUTES = int(os.getenv("RADARR_REFRESH_MINUTES", 10))  # Ensure it's an integer
+REFRESH_MINUTES = int(os.getenv("REFRESH_MINUTES", 10))  # Ensure it's an integer
 QUALITY_PROFILE = os.getenv("RADARR_QUALITY_PROFILE", "Any")  # Default to "Any"
 ROOT_FOLDER_PATH = os.getenv("RADARR_ROOT_FOLDER_PATH", "/movies")  # Default to /movies
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", 3))  # Default to 3 threads if not set
