@@ -10,6 +10,8 @@ REFRESH_MINUTES = int(os.getenv("RADARR_REFRESH_MINUTES", 10))  # Ensure it's an
 QUALITY_PROFILE = os.getenv("RADARR_QUALITY_PROFILE", "Any")  # Default to "Any"
 ROOT_FOLDER_PATH = os.getenv("RADARR_ROOT_FOLDER_PATH", "/movies")  # Default to /movies
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", 3))  # Default to 3 threads if not set
+RETRY_COUNT = 5
+RETRY_DELAY = 10  # in seconds
 
 if not API_KEY or not RADARR_URL:
     print("Missing RADARR_API_KEY or RADARR_URL environment variables.")
@@ -18,22 +20,26 @@ if not API_KEY or not RADARR_URL:
 def get_quality_profile_id(profile_name):
     url = f"{RADARR_URL}/api/v3/qualityProfile"
     headers = {"X-Api-Key": API_KEY}
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        profiles = response.json()
-        for profile in profiles:
-            if profile['name'].lower() == profile_name.lower():
-                return profile['id']
-        print(f"Quality profile '{profile_name}' not found.")
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error retrieving quality profiles: {e}")
-        return None
+    
+    for attempt in range(RETRY_COUNT):
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            profiles = response.json()
+            for profile in profiles:
+                if profile['name'].lower() == profile_name.lower():
+                    return profile['id']
+            print(f"Quality profile '{profile_name}' not found.")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"Error retrieving quality profiles (attempt {attempt + 1}/{RETRY_COUNT}): {e}")
+            time.sleep(RETRY_DELAY)
+    
+    print("Failed to retrieve quality profile ID after multiple attempts. Exiting.")
+    return None
 
 QUALITY_PROFILE_ID = get_quality_profile_id(QUALITY_PROFILE)
 if not QUALITY_PROFILE_ID:
-    print("Failed to retrieve quality profile ID. Exiting.")
     exit(1)
 
 # Cache to store Radarr movie data
